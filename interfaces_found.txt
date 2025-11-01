@@ -1,0 +1,4 @@
+Count: 2
+List:
+Intel[R] Ethernet Connection [16] I219-V
+Realtek 8852BE Wireless LAN WiFi 6 PCI-E NIC

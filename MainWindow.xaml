@@ -1,0 +1,110 @@
+﻿<Window x:Class="NetworkSpeedWidget.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetworkSpeedWidget"
+        mc:Ignorable="d"
+        Title="Network Speed Widget" 
+        Height="45" 
+        Width="150"
+        MinHeight="40"
+        MinWidth="120"
+        MaxHeight="80"
+        MaxWidth="300"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        MouseDown="Window_MouseDown"
+        MouseDoubleClick="Window_MouseDoubleClick"
+        Loaded="Window_Loaded"
+        Opacity="0.6">
+    
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                   To="1.0"
+                                   Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                   To="0.6"
+                                   Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+    
+    <Border Background="#F0202020" 
+            CornerRadius="4,4,0,0" 
+            BorderBrush="#30FFFFFF" 
+            BorderThickness="1,1,1,0"
+            Padding="6,3,6,3">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,6,0">
+                <!-- Download Speed -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,1">
+                    <TextBlock Text="↓" 
+                              FontSize="10" 
+                              FontWeight="Bold"
+                              Foreground="#4CAF50" 
+                              VerticalAlignment="Center"
+                              Margin="0,0,3,0"/>
+                    <TextBlock x:Name="DownloadSpeedText" 
+                              Text="0 B/s" 
+                              FontSize="9" 
+                              Foreground="White"
+                              VerticalAlignment="Center"
+                              FontFamily="Segoe UI"/>
+                </StackPanel>
+                
+                <!-- Upload Speed -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="↑" 
+                              FontSize="10" 
+                              FontWeight="Bold"
+                              Foreground="#FF5722" 
+                              VerticalAlignment="Center"
+                              Margin="0,0,3,0"/>
+                    <TextBlock x:Name="UploadSpeedText" 
+                              Text="0 B/s" 
+                              FontSize="9" 
+                              Foreground="White"
+                              VerticalAlignment="Center"
+                              FontFamily="Segoe UI"/>
+                </StackPanel>
+            </StackPanel>
+            
+            <!-- Resize Grip -->
+            <Path Grid.Column="1" 
+                  Data="M 8,0 L 0,8 M 8,4 L 4,8" 
+                  Stroke="#40FFFFFF" 
+                  StrokeThickness="0.8"
+                  HorizontalAlignment="Right" 
+                  VerticalAlignment="Bottom" 
+                  Margin="0,0,2,2"
+                  IsHitTestVisible="False"/>
+        </Grid>
+    </Border>
+    
+    <!-- Context Menu -->
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Exit" Click="Exit_Click"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+</Window>
