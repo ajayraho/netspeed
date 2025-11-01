@@ -16,6 +16,7 @@ public partial class DetailedMonitorWindow : Window
 {
     private readonly ProcessMonitor processMonitor;
     private readonly NetworkMonitor networkMonitor;
+    private readonly ConnectionMonitor connectionMonitor;
     private readonly DispatcherTimer updateTimer;
     private bool sortDescending = true;
     private string currentSortColumn = "";
@@ -38,10 +39,14 @@ public partial class DetailedMonitorWindow : Window
         
         processMonitor = new ProcessMonitor();
         networkMonitor = new NetworkMonitor();
+        connectionMonitor = new ConnectionMonitor();
         
         // Use CollectionViewSource for sorting
         processGroupsView = CollectionViewSource.GetDefaultView(processMonitor.ProcessGroups);
         ProcessTreeView.ItemsSource = processGroupsView;
+
+        // Set connections view
+        ConnectionsTreeView.ItemsSource = connectionMonitor.ProcessConnections;
 
         // Set default sort to download speed descending
         // Don't set currentSortColumn so first click will sort descending
@@ -79,6 +84,9 @@ public partial class DetailedMonitorWindow : Window
         // Update network statistics
         networkMonitor.Update();
         UpdateStatistics(networkMonitor.DownloadSpeed, networkMonitor.UploadSpeed);
+
+        // Update connections (run in background)
+        Task.Run(() => connectionMonitor.Update());
     }
 
     private async Task UpdateDataAsync()
@@ -93,6 +101,10 @@ public partial class DetailedMonitorWindow : Window
                 {
                     var totalProcesses = processMonitor.ProcessGroups.Sum(g => g.InstanceCount);
                     ProcessCountText.Text = $"({processMonitor.ProcessGroups.Count} apps, {totalProcesses} processes)";
+                    
+                    // Update connection count
+                    var totalConnections = connectionMonitor.ProcessConnections.Sum(p => p.ConnectionCount);
+                    ConnectionCountText.Text = $"({connectionMonitor.ProcessConnections.Count} processes, {totalConnections} connections)";
                     
                     // On first update, ensure the sort is applied
                     if (isFirstUpdate)
@@ -375,8 +387,22 @@ public partial class DetailedMonitorWindow : Window
         updateTimer.Stop();
         processMonitor.Dispose();
         networkMonitor.Dispose();
+        connectionMonitor.Dispose();
         NetworkBlocker.BlockedProcessesChanged -= OnBlockedProcessesChanged;
     }
+
+    #region Connections Tab
+
+    private void ConnectionExpander_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement element && element.DataContext is ProcessConnectionInfo processConn)
+        {
+            processConn.ToggleExpanded();
+            e.Handled = true;
+        }
+    }
+
+    #endregion
 
     #region Statistics Tab
 
