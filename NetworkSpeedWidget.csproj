@@ -15,12 +15,13 @@
     <Company>ajayraho productions</Company>
     <Product>Network Speed Widget</Product>
     <Description>Real-time network monitoring widget with process tracking, statistics, and connection inspection</Description>
-    <Copyright>Copyright © 2025 Ajit Kumar</Copyright>
+    <Copyright>Copyright © 2025 Ajit Kumar (ajayraho productions)</Copyright>
     <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- Publishing Settings (used during publish) -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <PublishReadyToRun>true</PublishReadyToRun>
