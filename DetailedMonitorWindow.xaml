@@ -196,40 +196,79 @@
                                           VerticalAlignment="Center"/>
                             </StackPanel>
                             
-                            <!-- Blocked Processes Button -->
-                            <Button Content="🚫 Blocked Processes" 
-                                   HorizontalAlignment="Right"
-                                   Width="160"
-                                   Height="30"
-                                   Background="#FFFF9800"
-                                   Foreground="White"
-                                   BorderThickness="0"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Cursor="Hand"
-                                   Click="OpenBlockedProcesses_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" 
-                                                           CornerRadius="4">
-                                                        <ContentPresenter HorizontalAlignment="Center" 
-                                                                        VerticalAlignment="Center"
-                                                                        Margin="5"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#FFFFA726"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <!-- Right side buttons -->
+                            <StackPanel Orientation="Horizontal" 
+                                       HorizontalAlignment="Right">
+                                <!-- About Button -->
+                                <Button Content="?" 
+                                       Width="30"
+                                       Height="30"
+                                       Background="#FF3E3E42"
+                                       Foreground="White"
+                                       BorderThickness="0"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Cursor="Hand"
+                                       ToolTip="About"
+                                       Margin="0,0,10,0"
+                                       Click="About_Click">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" 
+                                                               CornerRadius="4">
+                                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                                            VerticalAlignment="Center"
+                                                                            Margin="5"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF007ACC"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Blocked Processes Button -->
+                                <Button Content="🚫 Blocked Processes" 
+                                       Width="160"
+                                       Height="30"
+                                       Background="#FFFF9800"
+                                       Foreground="White"
+                                       BorderThickness="0"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Cursor="Hand"
+                                       Click="OpenBlockedProcesses_Click">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" 
+                                                               CornerRadius="4">
+                                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                                            VerticalAlignment="Center"
+                                                                            Margin="5"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FFFFA726"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
 

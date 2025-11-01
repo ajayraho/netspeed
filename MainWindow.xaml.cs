@@ -30,6 +30,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        
+        // Set window icon
+        try
+        {
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                this.Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri(iconPath, UriKind.Absolute));
+            }
+        }
+        catch { }
+        
         InitializeNetworkMonitor();
         InitializeSystemTray();
         InitializeTimer();
@@ -44,10 +56,27 @@ public partial class MainWindow : Window
     {
         notifyIcon = new System.Windows.Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Information,
             Visible = true,
             Text = "Network Speed Widget"
         };
+
+        // Try to load custom icon, fallback to system icon if not found
+        try
+        {
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+            }
+            else
+            {
+                notifyIcon.Icon = System.Drawing.SystemIcons.Information;
+            }
+        }
+        catch
+        {
+            notifyIcon.Icon = System.Drawing.SystemIcons.Information;
+        }
 
         notifyIcon.DoubleClick += (s, e) =>
         {

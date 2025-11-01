@@ -213,6 +213,15 @@ public partial class DetailedMonitorWindow : Window
         blockedWindow.ShowDialog();
     }
 
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        var aboutDialog = new AboutDialog
+        {
+            Owner = this
+        };
+        aboutDialog.ShowDialog();
+    }
+
     private void EndTask_Click(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.Button button && button.Tag is ProcessNetworkInfo processInfo)

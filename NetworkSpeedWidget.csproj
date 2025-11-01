@@ -11,11 +11,12 @@
     <!-- Application Info -->
     <AssemblyName>NetworkSpeedWidget</AssemblyName>
     <Version>1.0.0</Version>
-    <Authors>Your Name</Authors>
-    <Company>Your Company</Company>
+    <Authors>Ajit Kumar</Authors>
+    <Company>ajayraho productions</Company>
     <Product>Network Speed Widget</Product>
     <Description>Real-time network monitoring widget with process tracking, statistics, and connection inspection</Description>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2025 Ajit Kumar</Copyright>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- Publishing Settings (used during publish) -->
@@ -31,6 +32,12 @@
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="9.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="app.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

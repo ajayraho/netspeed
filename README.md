@@ -8,60 +8,85 @@ A modern, real-time network monitoring widget for Windows 11 with process tracki
 
 ## ✨ Features
 
-### 📊 **Real-time Monitoring**
-- Live network upload/download speeds
-- Floating widget with opacity animations
-- System tray integration
-- Always-on-top display
+### 📊 **Real-time Network Monitoring**
 
-### 🔍 **Process Monitoring**
-- Track network usage per process
+- Live upload/download speed display on floating widget
+- Updates every second with accurate speed calculations
+- System tray integration with speed tooltips
+- Opacity animations when hovering
+- Always-on-top positioning
+
+### 🔍 **Process Network Tracking**
+
+- Monitor network I/O per process in real-time
 - Hierarchical grouping by process name
-- Sort by download/upload speed
-- Process icons and instance counts
-- End task and block network traffic
+- View all instances of each process
+- Sort by process name, download speed, or upload speed (ascending/descending)
+- Process icons extracted from executables
+- Shows PID for each process instance
 
 ### 🌐 **Connection Inspector**
-- View all active TCP connections
-- See which IPs/domains processes connect to
+
+- View all active TCP connections system-wide
+- See which processes own which connections
+- Remote IP addresses and port numbers displayed
+- Automatic DNS hostname resolution (async)
+- Connection state tracking (Established, TimeWait, etc.)
 - Connection count per process
-- DNS hostname resolution
-- Real-time connection state monitoring
+- Grouped by process with expand/collapse
 
-### � **Statistics & Analytics**
-- Real-time speed graphs (download/upload)
-- Configurable time ranges (60s, 5m, 30m, 1h)
-- Session statistics (total downloaded/uploaded)
-- Peak speed tracking
-- Beautiful chart visualizations
+### 📈 **Statistics & Graphs**
 
-### 🚫 **Network Control**
-- Block/unblock network traffic per process
-- Windows Firewall integration
-- Manage all blocked processes
-- Visual indicators for blocked state
+- Real-time line graphs for download and upload speeds
+- Multiple time range options:
+  - Last 60 seconds (default)
+  - Last 5 minutes
+  - Last 30 minutes
+  - Last hour
+- Session summary statistics:
+  - Total data downloaded
+  - Total data uploaded
+  - Peak download speed
+  - Peak upload speed
+- Auto-scaling graphs with grid lines
 
-### 🎨 **Modern UI**
-- Dark theme interface
-- Custom thin scrollbars
-- Smooth animations
-- Draggable dialogs
-- Responsive design
+### 🚫 **Network Traffic Control**
+
+- Block network traffic for any process via Windows Firewall
+- Unblock previously blocked processes
+- Visual indicators (✅/🚫) showing block status
+- Manage all blocked processes in dedicated window
+- Real-time firewall rule scanning
+- Persistent blocking rules (survives app restart)
+- Works on both individual processes and all instances of a process
+
+### 🎨 **User Interface**
+
+- Modern dark theme throughout
+- Tab-based organization (Processes, Connections, Statistics)
+- Custom thin scrollbars (8px width)
+- Draggable custom dialog boxes
+- Centered dialogs on screen
+- Smooth hover effects and transitions
+- Message-only dialogs (OK button) vs confirmation dialogs (Yes/No)
+- About dialog with app information
 
 ## 🎯 Requirements
 
 - **OS**: Windows 10/11 (64-bit)
-- **Runtime**: .NET 9.0 (included in single-file build)
-- **Permissions**: Administrator rights (for blocking network traffic)
+- **Runtime**: .NET 9.0 (included in self-contained build)
+- **Permissions**: Administrator rights required for network blocking features
 
 ## 📥 Installation
 
-### Option 1: Download Release (Recommended)
-1. Download `NetworkSpeedWidget.exe` from [Releases](https://github.com/yourusername/NetworkSpeedWidget/releases)
-2. Run the executable
-3. (Optional) Right-click → Run as Administrator for network blocking features
+### Option 1: Download Release
+
+1. Download `NetworkSpeedWidget.exe` from [Releases](https://github.com/yourusername/NetworkSpeedWidget/releases/latest)
+2. Run the executable (no installation required)
+3. Right-click → Run as Administrator for full features (network blocking)
 
 ### Option 2: Build from Source
+
 ```powershell
 # Clone the repository
 git clone https://github.com/yourusername/NetworkSpeedWidget.git
@@ -77,31 +102,41 @@ dotnet run
 ## 🚀 Usage
 
 ### Main Widget
-- **Double-click**: Open detailed monitoring window
-- **Hover**: Shows current speeds
-- **Opacity**: Automatically adjusts based on mouse position
+
+- **Double-click widget**: Opens detailed monitoring window
+- **Hover over widget**: Widget becomes more visible
+- **System tray icon**: Left-click to show/hide, right-click to exit
 
 ### Detailed Monitor Window
 
-#### Processes Tab
-- Click column headers to sort
-- Click ▶ to expand process instances
-- **🚫 Button**: Block/unblock network traffic
-- **❌ Button**: End process task
+#### 📊 Processes Tab
 
-#### Connections Tab
-- View all active connections per process
-- Expand to see remote IPs and hostnames
-- Monitor connection states
+- **Sort columns**: Click "Download" or "Upload" headers to sort (first click = descending)
+- **Expand process**: Click ▶ arrow to see all instances
+- **End Task**: Click ❌ button to kill process
+- **Block Network**: Click 🚫 button to block/unblock (changes to ✅ when blocked)
+- **Blocked Processes button**: Opens manager for all blocked processes
+- **? button**: Opens About dialog
 
-#### Statistics Tab
-- Live speed graphs
-- Change time range from dropdown
-- View session totals and peak speeds
+#### 🌐 Connections Tab
 
-### System Tray
-- **Left-click**: Show/hide widget
-- **Right-click**: Exit application
+- **View connections**: See all active TCP connections per process
+- **Expand process**: Click ▶ to see individual connections
+- **Remote addresses**: Shows IP:Port and resolved hostnames
+- **Connection state**: Displays TCP state (Established, etc.)
+
+#### 📈 Statistics Tab
+
+- **Live graphs**: Real-time download (green) and upload (red) speed charts
+- **Time range dropdown**: Select 60s, 5m, 30m, or 1h history
+- **Session stats**: View totals and peak speeds since window opened
+
+### Blocked Processes Manager
+
+- View all processes with active firewall blocks
+- Click "Unblock" to remove individual blocks
+- Click "Remove All Blocks" to clear all at once
+- Click "Refresh" to sync with actual firewall rules
 
 ## 🔧 Building Release
 
@@ -117,31 +152,58 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 # Output: bin\Release\net9.0-windows\win-x64\publish\NetworkSpeedWidget.exe
 ```
 
-## 🛠️ Technical Details
+## 🛠️ Technical Implementation
 
-### Technologies
-- **Framework**: .NET 9.0 WPF
-- **Language**: C# 12
-- **APIs Used**:
-  - `NetworkInterface` - Network speed monitoring
-  - `GetProcessIoCounters` (Win32) - Process I/O statistics
-  - `GetExtendedTcpTable` (Win32) - Connection tracking
-  - `netsh advfirewall` - Firewall management
+### Core Technologies
 
-### Architecture
-- **MVVM Pattern**: Clean separation of concerns
-- **Observable Collections**: Real-time UI updates
-- **Async/Await**: Non-blocking operations
-- **P/Invoke**: Native Windows API integration
+- **.NET 9.0 WPF** - Modern Windows desktop framework
+- **C# 12** - Latest C# language features
+- **XAML** - Declarative UI markup
 
-## 📋 Features Roadmap
+### Network Monitoring APIs
 
-- [ ] Network interface selection
-- [ ] Bandwidth limits and alerts
-- [ ] Export statistics to CSV
-- [ ] Custom themes
-- [ ] UDP connection monitoring
-- [ ] Historical data tracking
+- **NetworkInterface.GetIPv4Statistics()** - Real-time byte counters for speed calculation
+- **DateTime-based delta calculation** - Accurate speed measurement over time intervals
+
+### Process Monitoring
+
+- **Win32 GetProcessIoCounters** - Per-process I/O statistics via P/Invoke
+- **Network factor heuristics** - Estimates network activity (30% for network apps, 10% for others)
+- **Process.GetProcesses()** - System-wide process enumeration
+
+### Connection Tracking
+
+- **Win32 GetExtendedTcpTable** - Maps TCP connections to owning processes
+- **IPGlobalProperties** - Retrieves active connection information
+- **Dns.GetHostEntryAsync()** - Asynchronous hostname resolution
+
+### Firewall Management
+
+- **netsh advfirewall firewall** - Windows Firewall command-line interface
+- **UAC elevation** - Prompts for admin rights when blocking
+- **Rule naming convention**: `NetworkSpeedWidget_Block_{processName}_IN/OUT`
+
+### UI Architecture
+
+- **Observable Collections** - Auto-updating data bindings
+- **INotifyPropertyChanged** - Real-time property change notifications
+- **CollectionViewSource** - Persistent sorting with SortDescriptions
+- **DispatcherTimer** - 1-second update intervals
+- **Async/await** - Non-blocking background operations
+- **Custom value converters** - Block state to icon/tooltip conversion
+
+## 📋 What's Not Included
+
+This is an accurate representation of what the app currently does. The following features are **NOT implemented**:
+
+- Network interface selection (monitors all interfaces combined)
+- Bandwidth limits or alerts
+- Export to CSV/JSON
+- Custom themes/colors
+- UDP connection monitoring (only TCP)
+- Historical data persistence (only session data)
+- Auto-start with Windows
+- Packet-level deep inspection
 
 ## 🤝 Contributing
 
@@ -154,6 +216,11 @@ This project is licensed under the MIT License.
 ## ⚠️ Disclaimer
 
 This software is provided as-is. Use at your own risk. Network blocking features require administrator privileges and modify Windows Firewall rules.
+
+## 👨‍💻 Author
+
+**Ajit Kumar**  
+ajayraho productions
 
 ---
 
