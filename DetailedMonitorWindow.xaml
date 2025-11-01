@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkSpeedWidget"
+        xmlns:converters="clr-namespace:NetworkSpeedWidget.Converters"
         mc:Ignorable="d"
         Title="Network Monitor - Detailed View" 
         Height="600" 
@@ -12,6 +13,10 @@
         MinWidth="600"
         WindowStartupLocation="CenterScreen"
         Background="#FF1E1E1E">
+    
+    <Window.Resources>
+        <converters:BlockedStateConverter x:Key="BlockedStateConverter"/>
+    </Window.Resources>
     
     <Grid>
         <TabControl Background="#FF1E1E1E" 
@@ -65,19 +70,56 @@
                             Padding="15,10"
                             BorderBrush="#FF3F3F46"
                             BorderThickness="0,0,0,1">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Active Processes" 
-                                      FontSize="16" 
-                                      FontWeight="Bold"
-                                      Foreground="White"
-                                      VerticalAlignment="Center"/>
-                            <TextBlock x:Name="ProcessCountText"
-                                      Text="(0 apps, 0 processes)"
-                                      FontSize="12"
-                                      Foreground="#FF999999"
-                                      Margin="10,0,0,0"
-                                      VerticalAlignment="Center"/>
-                        </StackPanel>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Active Processes" 
+                                          FontSize="16" 
+                                          FontWeight="Bold"
+                                          Foreground="White"
+                                          VerticalAlignment="Center"/>
+                                <TextBlock x:Name="ProcessCountText"
+                                          Text="(0 apps, 0 processes)"
+                                          FontSize="12"
+                                          Foreground="#FF999999"
+                                          Margin="10,0,0,0"
+                                          VerticalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Blocked Processes Button -->
+                            <Button Content="🚫 Blocked Processes" 
+                                   HorizontalAlignment="Right"
+                                   Width="160"
+                                   Height="30"
+                                   Background="#FFFF9800"
+                                   Foreground="White"
+                                   BorderThickness="0"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Cursor="Hand"
+                                   Click="OpenBlockedProcesses_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                           CornerRadius="4">
+                                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FFFFA726"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
                     </Border>
 
                     <!-- Column Headers -->
@@ -94,6 +136,7 @@
                                 <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Empty for arrow -->
@@ -169,6 +212,16 @@
                                           Margin="5,0,0,0"
                                           VerticalAlignment="Center"/>
                             </StackPanel>
+
+                            <!-- Actions Header -->
+                            <TextBlock Grid.Column="6" 
+                                      Text="Actions"
+                                      FontSize="11"
+                                      FontWeight="Bold"
+                                      Foreground="#FFCCCCCC"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"
+                                      Margin="10,0,0,0"/>
                         </Grid>
                     </Border>
 
@@ -224,6 +277,7 @@
                                             <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="120"/>
                                             <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="80"/>
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Expander Arrow (Clickable) -->
@@ -321,6 +375,91 @@
                                                       Margin="2,0,0,0"
                                                       VerticalAlignment="Center"/>
                                         </StackPanel>
+
+                                        <!-- Actions for Group (All Instances) -->
+                                        <StackPanel Grid.Column="6" 
+                                                   Orientation="Horizontal"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="5,0,0,0">
+                                            <!-- Block/Unblock All Button -->
+                                            <Button Width="18" 
+                                                   Height="18"
+                                                   Margin="0,0,4,0"
+                                                   Padding="0"
+                                                   Background="#FF3E3E42"
+                                                   BorderBrush="#FF555555"
+                                                   BorderThickness="1"
+                                                   Cursor="Hand"
+                                                   ToolTip="{Binding ProcessName, Converter={StaticResource BlockedStateConverter}, ConverterParameter=Tooltip}"
+                                                   Click="BlockNetworkGroup_Click"
+                                                   Tag="{Binding}">
+                                                <TextBlock Text="{Binding ProcessName, Converter={StaticResource BlockedStateConverter}, ConverterParameter=Icon}" 
+                                                          FontSize="10"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center"/>
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}"
+                                                                           BorderBrush="{TemplateBinding BorderBrush}"
+                                                                           BorderThickness="{TemplateBinding BorderThickness}"
+                                                                           CornerRadius="3">
+                                                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                                                        VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#FFFF9800"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <!-- End All Button -->
+                                            <Button Width="18" 
+                                                   Height="18"
+                                                   Padding="0"
+                                                   Background="#FF3E3E42"
+                                                   BorderBrush="#FF555555"
+                                                   BorderThickness="1"
+                                                   Cursor="Hand"
+                                                   ToolTip="End All Instances"
+                                                   Click="EndTaskGroup_Click"
+                                                   Tag="{Binding}">
+                                                <TextBlock Text="❌" 
+                                                          FontSize="10"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center"/>
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}"
+                                                                           BorderBrush="{TemplateBinding BorderBrush}"
+                                                                           BorderThickness="{TemplateBinding BorderThickness}"
+                                                                           CornerRadius="3">
+                                                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                                                        VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#FFF44336"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
 
@@ -338,6 +477,7 @@
                                                     <ColumnDefinition Width="50"/>
                                                     <ColumnDefinition Width="120"/>
                                                     <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="80"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Empty space for alignment -->
@@ -384,6 +524,91 @@
                                                               FontSize="11"
                                                               Width="90"
                                                               TextAlignment="Left"/>
+                                                </StackPanel>
+
+                                                <!-- Action Buttons -->
+                                                <StackPanel Grid.Column="6" 
+                                                           Orientation="Horizontal"
+                                                           HorizontalAlignment="Center"
+                                                           Margin="5,0,0,0">
+                                                    <!-- Block/Unblock Network Button -->
+                                                    <Button Width="18" 
+                                                           Height="18"
+                                                           Margin="0,0,4,0"
+                                                           Padding="0"
+                                                           Background="#FF3E3E42"
+                                                           BorderBrush="#FF555555"
+                                                           BorderThickness="1"
+                                                           Cursor="Hand"
+                                                           ToolTip="{Binding ProcessName, Converter={StaticResource BlockedStateConverter}, ConverterParameter=Tooltip}"
+                                                           Click="BlockNetwork_Click"
+                                                           Tag="{Binding}">
+                                                        <TextBlock Text="{Binding ProcessName, Converter={StaticResource BlockedStateConverter}, ConverterParameter=Icon}" 
+                                                                  FontSize="10"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Center"/>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   BorderBrush="{TemplateBinding BorderBrush}"
+                                                                                   BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                   CornerRadius="3">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#FFFF9800"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+
+                                                    <!-- End Task Button -->
+                                                    <Button Width="18" 
+                                                           Height="18"
+                                                           Padding="0"
+                                                           Background="#FF3E3E42"
+                                                           BorderBrush="#FF555555"
+                                                           BorderThickness="1"
+                                                           Cursor="Hand"
+                                                           ToolTip="End Task"
+                                                           Click="EndTask_Click"
+                                                           Tag="{Binding}">
+                                                        <TextBlock Text="❌" 
+                                                                  FontSize="10"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Center"/>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border Background="{TemplateBinding Background}"
+                                                                                   BorderBrush="{TemplateBinding BorderBrush}"
+                                                                                   BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                   CornerRadius="3">
+                                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                                VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#FFF44336"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
