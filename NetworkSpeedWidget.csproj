@@ -7,6 +7,25 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    
+    <!-- Application Info -->
+    <AssemblyName>NetworkSpeedWidget</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>Your Name</Authors>
+    <Company>Your Company</Company>
+    <Product>Network Speed Widget</Product>
+    <Description>Real-time network monitoring widget with process tracking, statistics, and connection inspection</Description>
+    <Copyright>Copyright © 2025</Copyright>
+  </PropertyGroup>
+
+  <!-- Publishing Settings (used during publish) -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>

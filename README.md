@@ -1,129 +1,160 @@
-# Network Speed Widget for Windows 11
+# 🚀 Network Speed Widget
 
-A lightweight, always-on-top network speed monitor for Windows 11 that displays real-time upload and download speeds near your taskbar.
+A modern, real-time network monitoring widget for Windows 11 with process tracking, statistics visualization, and connection inspection.
 
-## Features
+![Network Speed Widget](https://img.shields.io/badge/Platform-Windows%2011-blue)
+![.NET](https://img.shields.io/badge/.NET-9.0-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-✨ **Real-time Monitoring** - Updates network speeds every second
-📊 **Dual Display** - Shows both download (↓) and upload (↑) speeds
-🎯 **Always on Top** - Stays visible above all other windows
-🖱️ **Draggable** - Click and drag to reposition anywhere on screen
-💾 **System Tray Integration** - Minimizes to system tray with speed tooltip
-🎨 **Sleek Design** - Semi-transparent dark theme with rounded corners
-🚫 **No Taskbar Icon** - Keeps your taskbar clean
+## ✨ Features
 
-## Requirements
+### 📊 **Real-time Monitoring**
+- Live network upload/download speeds
+- Floating widget with opacity animations
+- System tray integration
+- Always-on-top display
 
-- Windows 11 (or Windows 10)
-- .NET 9.0 Runtime
-- Administrator privileges (for PerformanceCounter access)
+### 🔍 **Process Monitoring**
+- Track network usage per process
+- Hierarchical grouping by process name
+- Sort by download/upload speed
+- Process icons and instance counts
+- End task and block network traffic
 
-## How to Run
+### 🌐 **Connection Inspector**
+- View all active TCP connections
+- See which IPs/domains processes connect to
+- Connection count per process
+- DNS hostname resolution
+- Real-time connection state monitoring
 
-### From Visual Studio Code:
+### � **Statistics & Analytics**
+- Real-time speed graphs (download/upload)
+- Configurable time ranges (60s, 5m, 30m, 1h)
+- Session statistics (total downloaded/uploaded)
+- Peak speed tracking
+- Beautiful chart visualizations
 
-```bash
+### 🚫 **Network Control**
+- Block/unblock network traffic per process
+- Windows Firewall integration
+- Manage all blocked processes
+- Visual indicators for blocked state
+
+### 🎨 **Modern UI**
+- Dark theme interface
+- Custom thin scrollbars
+- Smooth animations
+- Draggable dialogs
+- Responsive design
+
+## 🎯 Requirements
+
+- **OS**: Windows 10/11 (64-bit)
+- **Runtime**: .NET 9.0 (included in single-file build)
+- **Permissions**: Administrator rights (for blocking network traffic)
+
+## 📥 Installation
+
+### Option 1: Download Release (Recommended)
+1. Download `NetworkSpeedWidget.exe` from [Releases](https://github.com/yourusername/NetworkSpeedWidget/releases)
+2. Run the executable
+3. (Optional) Right-click → Run as Administrator for network blocking features
+
+### Option 2: Build from Source
+```powershell
+# Clone the repository
+git clone https://github.com/yourusername/NetworkSpeedWidget.git
+cd NetworkSpeedWidget
+
+# Build
+dotnet build
+
+# Run
 dotnet run
 ```
 
-### Build and Run Executable:
+## 🚀 Usage
 
-```bash
-# Build the application
-dotnet build -c Release
+### Main Widget
+- **Double-click**: Open detailed monitoring window
+- **Hover**: Shows current speeds
+- **Opacity**: Automatically adjusts based on mouse position
 
-# Run the executable
-.\bin\Release\net9.0-windows\NetworkSpeedWidget.exe
+### Detailed Monitor Window
+
+#### Processes Tab
+- Click column headers to sort
+- Click ▶ to expand process instances
+- **🚫 Button**: Block/unblock network traffic
+- **❌ Button**: End process task
+
+#### Connections Tab
+- View all active connections per process
+- Expand to see remote IPs and hostnames
+- Monitor connection states
+
+#### Statistics Tab
+- Live speed graphs
+- Change time range from dropdown
+- View session totals and peak speeds
+
+### System Tray
+- **Left-click**: Show/hide widget
+- **Right-click**: Exit application
+
+## 🔧 Building Release
+
+To create a release build:
+
+```powershell
+# Clean previous builds
+dotnet clean
+
+# Publish single-file executable
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+
+# Output: bin\Release\net9.0-windows\win-x64\publish\NetworkSpeedWidget.exe
 ```
 
-## Usage
+## 🛠️ Technical Details
 
-### Window Controls:
+### Technologies
+- **Framework**: .NET 9.0 WPF
+- **Language**: C# 12
+- **APIs Used**:
+  - `NetworkInterface` - Network speed monitoring
+  - `GetProcessIoCounters` (Win32) - Process I/O statistics
+  - `GetExtendedTcpTable` (Win32) - Connection tracking
+  - `netsh advfirewall` - Firewall management
 
-- **Left Click + Drag** - Move the widget anywhere on screen
-- **Right Click** - Open context menu with Exit option
-- **System Tray Icon** - Double-click to show/hide widget
+### Architecture
+- **MVVM Pattern**: Clean separation of concerns
+- **Observable Collections**: Real-time UI updates
+- **Async/Await**: Non-blocking operations
+- **P/Invoke**: Native Windows API integration
 
-### System Tray:
+## 📋 Features Roadmap
 
-- The widget creates a system tray icon
-- Hover over the icon to see current speeds
-- Right-click for Show/Hide and Exit options
-
-## Default Position
-
-The widget automatically positions itself at the bottom-right corner of your screen, just above the taskbar (with 10px padding).
-
-## Speed Display Format
-
-Speeds are automatically formatted:
-
-- **B/s** - Bytes per second
-- **KB/s** - Kilobytes per second
-- **MB/s** - Megabytes per second
-- **GB/s** - Gigabytes per second
-
-## Project Structure
-
-```
-NetworkSpeedWidget/
-├── App.xaml              # WPF Application definition
-├── App.xaml.cs           # Application code-behind
-├── MainWindow.xaml       # Main widget UI
-├── MainWindow.xaml.cs    # Main window logic
-├── NetworkMonitor.cs     # Network speed monitoring service
-└── NetworkSpeedWidget.csproj  # Project configuration
-```
-
-## Technical Details
-
-### Network Monitoring
-
-- Uses `System.Diagnostics.PerformanceCounter` to monitor network interface statistics
-- Automatically detects the active network interface
-- Filters out loopback and virtual adapters
-- Updates every 1 second via `DispatcherTimer`
-
-### UI Design
-
-- **Window Size**: 180×80 pixels
-- **Background**: Semi-transparent black (#E0000000)
-- **Border**: Subtle white border with 8px rounded corners
-- **Fonts**: Consolas for monospaced speed display
-- **Colors**:
-  - Download: Green (#4CAF50)
-  - Upload: Orange/Red (#FF5722)
-
-## Troubleshooting
-
-### No speeds showing (0 B/s):
-
-1. Run the application as Administrator
-2. Check your network connection
-3. The first reading may take 1-2 seconds to appear
-
-### Wrong network interface:
-
-The app auto-detects the active interface. If it picks the wrong one, you may need to modify `NetworkMonitor.cs` to specify your interface name.
-
-### System tray icon not appearing:
-
-This is normal on some systems. The widget window will still function normally.
-
-## Future Enhancements
-
-- [ ] Custom theme colors
-- [ ] Configurable update interval
 - [ ] Network interface selection
-- [ ] Data usage statistics
-- [ ] Graph visualization
-- [ ] Settings panel
-- [ ] Auto-start with Windows
+- [ ] Bandwidth limits and alerts
+- [ ] Export statistics to CSV
+- [ ] Custom themes
+- [ ] UDP connection monitoring
+- [ ] Historical data tracking
 
-## License
+## 🤝 Contributing
 
-Free to use and modify for personal or commercial projects.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Author
+## 📝 License
 
-Created for Windows 11 taskbar integration using C# and WPF.
+This project is licensed under the MIT License.
+
+## ⚠️ Disclaimer
+
+This software is provided as-is. Use at your own risk. Network blocking features require administrator privileges and modify Windows Firewall rules.
+
+---
+
+**Made with ❤️ for Windows power users**
