@@ -15,13 +15,17 @@ public partial class DetailedMonitorWindow : Window
     private readonly DispatcherTimer updateTimer;
     private bool sortDescending = true;
     private string currentSortColumn = "";
+    private ICollectionView processGroupsView;
 
     public DetailedMonitorWindow()
     {
         InitializeComponent();
         
         processMonitor = new ProcessMonitor();
-        ProcessTreeView.ItemsSource = processMonitor.ProcessGroups;
+        
+        // Use CollectionViewSource for sorting
+        processGroupsView = CollectionViewSource.GetDefaultView(processMonitor.ProcessGroups);
+        ProcessTreeView.ItemsSource = processGroupsView;
 
         // Update every 1 second
         updateTimer = new DispatcherTimer
@@ -115,29 +119,31 @@ public partial class DetailedMonitorWindow : Window
             currentSortColumn = column;
         }
 
-        var sorted = column switch
-        {
-            "name" => sortDescending 
-                ? processMonitor.ProcessGroups.OrderByDescending(g => g.ProcessName).ToList()
-                : processMonitor.ProcessGroups.OrderBy(g => g.ProcessName).ToList(),
-            "download" => sortDescending
-                ? processMonitor.ProcessGroups.OrderByDescending(g => g.TotalDownloadSpeed).ToList()
-                : processMonitor.ProcessGroups.OrderBy(g => g.TotalDownloadSpeed).ToList(),
-            "upload" => sortDescending
-                ? processMonitor.ProcessGroups.OrderByDescending(g => g.TotalUploadSpeed).ToList()
-                : processMonitor.ProcessGroups.OrderBy(g => g.TotalUploadSpeed).ToList(),
-            _ => processMonitor.ProcessGroups.ToList()
-        };
+        // Clear existing sort descriptions
+        processGroupsView.SortDescriptions.Clear();
 
-        processMonitor.ProcessGroups.Clear();
-        foreach (var group in sorted)
+        // Add new sort description
+        var direction = sortDescending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+        
+        switch (column)
         {
-            processMonitor.ProcessGroups.Add(group);
+            case "name":
+                processGroupsView.SortDescriptions.Add(new SortDescription("ProcessName", direction));
+                break;
+            case "download":
+                processGroupsView.SortDescriptions.Add(new SortDescription("TotalDownloadSpeed", direction));
+                break;
+            case "upload":
+                processGroupsView.SortDescriptions.Add(new SortDescription("TotalUploadSpeed", direction));
+                break;
         }
 
         // Update sort icons
         GlobalDownloadSortIcon.Text = column == "download" ? (sortDescending ? "↓" : "↑") : "";
         GlobalUploadSortIcon.Text = column == "upload" ? (sortDescending ? "↓" : "↑") : "";
+        
+        // Refresh the view
+        processGroupsView.Refresh();
     }
 
     protected override void OnClosed(EventArgs e)

@@ -228,7 +228,6 @@
 
                                         <!-- Expander Arrow (Clickable) -->
                                         <TextBlock Grid.Column="0" 
-                                                  Text="▶" 
                                                   FontSize="10"
                                                   Foreground="#FF999999"
                                                   VerticalAlignment="Center"
@@ -237,6 +236,7 @@
                                                   MouseDown="ExpanderArrow_MouseDown">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="▶"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                                             <Setter Property="Text" Value="▼"/>

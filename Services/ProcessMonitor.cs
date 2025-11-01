@@ -124,31 +124,47 @@ public class ProcessMonitor : IDisposable
                 lastStats.Remove(pid);
             }
 
-            // Update UI
+            // Update UI - UPDATE existing groups instead of clearing
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                processGroups.Clear();
-
+                // Update existing groups or create new ones
                 foreach (var kvp in processDataByName.Where(k => k.Value.Count > 0))
                 {
                     var groupName = kvp.Key;
                     var instances = kvp.Value;
 
-                    // SHOW ALL PROCESSES (no filtering)
+                    // Find existing group
+                    var group = processGroups.FirstOrDefault(g => g.ProcessName == groupName);
 
-                    var group = new ProcessGroupInfo
+                    if (group == null)
                     {
-                        ProcessName = groupName,
-                        Icon = IconExtractor.GetProcessIcon(groupName, instances[0].ProcessId)
-                    };
+                        // Create new group
+                        group = new ProcessGroupInfo
+                        {
+                            ProcessName = groupName,
+                            Icon = IconExtractor.GetProcessIcon(groupName, instances[0].ProcessId)
+                        };
+                        processGroups.Add(group);
+                    }
 
+                    // Update instances (preserve order, just update data)
+                    group.Instances.Clear();
                     foreach (var instance in instances)
                     {
                         group.Instances.Add(instance);
                     }
 
                     group.UpdateTotals();
-                    processGroups.Add(group);
+                }
+
+                // Remove groups that no longer exist
+                var groupsToRemove = processGroups
+                    .Where(g => !processDataByName.ContainsKey(g.ProcessName))
+                    .ToList();
+
+                foreach (var group in groupsToRemove)
+                {
+                    processGroups.Remove(group);
                 }
             });
         }
