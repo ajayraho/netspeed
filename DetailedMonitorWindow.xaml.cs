@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Controls;
 using System.Diagnostics;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using NetworkSpeedWidget.Services;
 using NetworkSpeedWidget.Models;
 
@@ -13,17 +15,29 @@ namespace NetworkSpeedWidget;
 public partial class DetailedMonitorWindow : Window
 {
     private readonly ProcessMonitor processMonitor;
+    private readonly NetworkMonitor networkMonitor;
     private readonly DispatcherTimer updateTimer;
     private bool sortDescending = true;
     private string currentSortColumn = "";
     private ICollectionView processGroupsView;
     private bool isFirstUpdate = true;
 
+    // Statistics tracking
+    private readonly List<double> downloadHistory = new();
+    private readonly List<double> uploadHistory = new();
+    private double totalDownloaded = 0;
+    private double totalUploaded = 0;
+    private double peakDownload = 0;
+    private double peakUpload = 0;
+    private int maxHistoryPoints = 60; // Default to 60 seconds
+    private DateTime sessionStart = DateTime.Now;
+
     public DetailedMonitorWindow()
     {
         InitializeComponent();
         
         processMonitor = new ProcessMonitor();
+        networkMonitor = new NetworkMonitor();
         
         // Use CollectionViewSource for sorting
         processGroupsView = CollectionViewSource.GetDefaultView(processMonitor.ProcessGroups);
@@ -61,6 +75,10 @@ public partial class DetailedMonitorWindow : Window
     private void UpdateTimer_Tick(object? sender, EventArgs e)
     {
         Task.Run(() => UpdateDataAsync());
+        
+        // Update network statistics
+        networkMonitor.Update();
+        UpdateStatistics(networkMonitor.DownloadSpeed, networkMonitor.UploadSpeed);
     }
 
     private async Task UpdateDataAsync()
@@ -356,6 +374,243 @@ public partial class DetailedMonitorWindow : Window
         base.OnClosed(e);
         updateTimer.Stop();
         processMonitor.Dispose();
+        networkMonitor.Dispose();
         NetworkBlocker.BlockedProcessesChanged -= OnBlockedProcessesChanged;
     }
+
+    #region Statistics Tab
+
+    private void UpdateStatistics(double downloadSpeed, double uploadSpeed)
+    {
+        // Add to history
+        downloadHistory.Add(downloadSpeed);
+        uploadHistory.Add(uploadSpeed);
+
+        // Trim history to max points
+        if (downloadHistory.Count > maxHistoryPoints)
+        {
+            downloadHistory.RemoveAt(0);
+            uploadHistory.RemoveAt(0);
+        }
+
+        // Update totals (speed is bytes/sec, so multiply by 1 second)
+        totalDownloaded += downloadSpeed;
+        totalUploaded += uploadSpeed;
+
+        // Update peaks
+        if (downloadSpeed > peakDownload)
+            peakDownload = downloadSpeed;
+        if (uploadSpeed > peakUpload)
+            peakUpload = uploadSpeed;
+
+        // Update UI
+        TotalDownloadedText.Text = FormatBytes(totalDownloaded);
+        TotalUploadedText.Text = FormatBytes(totalUploaded);
+        PeakDownloadText.Text = FormatSpeed(peakDownload);
+        PeakUploadText.Text = FormatSpeed(peakUpload);
+
+        // Redraw chart
+        DrawSpeedChart();
+    }
+
+    private void DrawSpeedChart()
+    {
+        SpeedChart.Children.Clear();
+
+        if (downloadHistory.Count == 0 || SpeedChart.ActualWidth == 0 || SpeedChart.ActualHeight == 0)
+            return;
+
+        var width = SpeedChart.ActualWidth;
+        var height = SpeedChart.ActualHeight;
+        var pointCount = downloadHistory.Count;
+
+        // Find max value for scaling
+        var maxValue = Math.Max(
+            downloadHistory.Count > 0 ? downloadHistory.Max() : 0,
+            uploadHistory.Count > 0 ? uploadHistory.Max() : 0
+        );
+
+        if (maxValue == 0)
+            maxValue = 1; // Prevent division by zero
+
+        // Add some padding (20% above max)
+        maxValue *= 1.2;
+
+        // Draw grid lines
+        DrawGridLines(width, height, maxValue);
+
+        // Draw download line (green)
+        DrawLine(downloadHistory, width, height, maxValue, System.Windows.Media.Brushes.Green, 2);
+
+        // Draw upload line (red)
+        DrawLine(uploadHistory, width, height, maxValue, System.Windows.Media.Brushes.Red, 2);
+
+        // Draw legend
+        DrawLegend(width);
+    }
+
+    private void DrawGridLines(double width, double height, double maxValue)
+    {
+        var gridBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(40, 255, 255, 255));
+        var textBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 255, 255, 255));
+
+        // Horizontal grid lines (5 lines)
+        for (int i = 0; i <= 4; i++)
+        {
+            var y = height - (height / 4 * i);
+            var line = new Line
+            {
+                X1 = 0,
+                Y1 = y,
+                X2 = width,
+                Y2 = y,
+                Stroke = gridBrush,
+                StrokeThickness = 1
+            };
+            SpeedChart.Children.Add(line);
+
+            // Add value label
+            var value = maxValue / 4 * i;
+            var label = new TextBlock
+            {
+                Text = FormatSpeed(value),
+                Foreground = textBrush,
+                FontSize = 10,
+                FontFamily = new System.Windows.Media.FontFamily("Consolas")
+            };
+            Canvas.SetLeft(label, 5);
+            Canvas.SetTop(label, y - 15);
+            SpeedChart.Children.Add(label);
+        }
+    }
+
+    private void DrawLine(List<double> data, double width, double height, double maxValue, System.Windows.Media.Brush brush, double thickness)
+    {
+        if (data.Count < 2)
+            return;
+
+        var pointCount = data.Count;
+        var xStep = width / Math.Max(maxHistoryPoints - 1, 1);
+
+        var polyline = new Polyline
+        {
+            Stroke = brush,
+            StrokeThickness = thickness,
+            StrokeLineJoin = PenLineJoin.Round
+        };
+
+        // Calculate starting x position (align to right)
+        var startX = width - (pointCount - 1) * xStep;
+
+        for (int i = 0; i < pointCount; i++)
+        {
+            var x = startX + (i * xStep);
+            var y = height - (data[i] / maxValue * height);
+            polyline.Points.Add(new System.Windows.Point(x, y));
+        }
+
+        SpeedChart.Children.Add(polyline);
+    }
+
+    private void DrawLegend(double width)
+    {
+        var legendX = width - 150;
+        var legendY = 10;
+
+        // Download legend
+        var downloadRect = new System.Windows.Shapes.Rectangle
+        {
+            Width = 15,
+            Height = 3,
+            Fill = System.Windows.Media.Brushes.Green
+        };
+        Canvas.SetLeft(downloadRect, legendX);
+        Canvas.SetTop(downloadRect, legendY + 5);
+        SpeedChart.Children.Add(downloadRect);
+
+        var downloadLabel = new TextBlock
+        {
+            Text = "Download",
+            Foreground = System.Windows.Media.Brushes.White,
+            FontSize = 11
+        };
+        Canvas.SetLeft(downloadLabel, legendX + 20);
+        Canvas.SetTop(downloadLabel, legendY);
+        SpeedChart.Children.Add(downloadLabel);
+
+        // Upload legend
+        var uploadRect = new System.Windows.Shapes.Rectangle
+        {
+            Width = 15,
+            Height = 3,
+            Fill = System.Windows.Media.Brushes.Red
+        };
+        Canvas.SetLeft(uploadRect, legendX);
+        Canvas.SetTop(uploadRect, legendY + 25);
+        SpeedChart.Children.Add(uploadRect);
+
+        var uploadLabel = new TextBlock
+        {
+            Text = "Upload",
+            Foreground = System.Windows.Media.Brushes.White,
+            FontSize = 11
+        };
+        Canvas.SetLeft(uploadLabel, legendX + 20);
+        Canvas.SetTop(uploadLabel, legendY + 20);
+        SpeedChart.Children.Add(uploadLabel);
+    }
+
+    private void TimeRange_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TimeRangeComboBox == null)
+            return;
+
+        maxHistoryPoints = TimeRangeComboBox.SelectedIndex switch
+        {
+            0 => 60,        // 60 seconds
+            1 => 300,       // 5 minutes
+            2 => 1800,      // 30 minutes
+            3 => 3600,      // 1 hour
+            _ => 60
+        };
+
+        // Trim existing history if needed
+        while (downloadHistory.Count > maxHistoryPoints)
+        {
+            downloadHistory.RemoveAt(0);
+            uploadHistory.RemoveAt(0);
+        }
+    }
+
+    private string FormatSpeed(double bytesPerSecond)
+    {
+        string[] sizes = { "B/s", "KB/s", "MB/s", "GB/s" };
+        int order = 0;
+        double speed = bytesPerSecond;
+
+        while (speed >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            speed /= 1024;
+        }
+
+        return $"{speed:0.##} {sizes[order]}";
+    }
+
+    private string FormatBytes(double bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        int order = 0;
+        double size = bytes;
+
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+
+        return $"{size:0.##} {sizes[order]}";
+    }
+
+    #endregion
 }
