@@ -30,8 +30,7 @@ public partial class DetailedMonitorWindow : Window
         ProcessTreeView.ItemsSource = processGroupsView;
 
         // Set default sort to download speed descending
-        currentSortColumn = "download";
-        sortDescending = true;
+        // Don't set currentSortColumn so first click will sort descending
         processGroupsView.SortDescriptions.Add(new SortDescription("TotalDownloadSpeed", ListSortDirection.Descending));
         GlobalDownloadSortIcon.Text = "↓";
 
@@ -138,10 +137,12 @@ public partial class DetailedMonitorWindow : Window
     {
         if (currentSortColumn == column)
         {
+            // Toggle if clicking the same column
             sortDescending = !sortDescending;
         }
         else
         {
+            // New column - always start with descending
             sortDescending = true;
             currentSortColumn = column;
         }
