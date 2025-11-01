@@ -56,6 +56,9 @@ public partial class DetailedMonitorWindow : Window
         // Subscribe to blocked processes changes
         NetworkBlocker.BlockedProcessesChanged += OnBlockedProcessesChanged;
 
+        // Load startup checkbox state
+        StartupCheckBox.IsChecked = StartupManager.IsStartupEnabled();
+
         // Update every 1 second
         updateTimer = new DispatcherTimer
         {
@@ -645,6 +648,14 @@ public partial class DetailedMonitorWindow : Window
         }
 
         return $"{size:0.##} {sizes[order]}";
+    }
+
+    private void StartupCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (StartupCheckBox.IsChecked.HasValue)
+        {
+            StartupManager.SetStartup(StartupCheckBox.IsChecked.Value);
+        }
     }
 
     #endregion
